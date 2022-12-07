@@ -14,7 +14,7 @@ while ptr < len(lines):
     line = lines[ptr].split()
     command = line[1]
     arg = "" if len(line) < 3 else line[2]
-
+    ptr += 1
     if command == "cd":
         if arg == "/":
             current = fs
@@ -25,16 +25,11 @@ while ptr < len(lines):
             if arg not in current["dirs"]:
                 current["dirs"][arg] = new_node(current)
             current = current["dirs"][arg]
-        ptr += 1
     elif command == "ls":
-        ptr += 1
         while ptr < len(lines) and not lines[ptr].startswith("$"):
-            a, b = lines[ptr].split()
-            if a == "dir":
-                if b not in current["dirs"]:
-                    current["dirs"][b] = new_node(current)
-            else:
-                current["filesizes"].append(int(a))
+            size, _ = lines[ptr].split()
+            if size != "dir":
+                current["filesizes"].append(int(size))
             ptr += 1
 
 sizes = []
