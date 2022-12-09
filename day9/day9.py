@@ -1,31 +1,31 @@
 lines = [line.strip() for line in open("./input.txt", "r").readlines()]
 
 dirs = {
-    "R": (0, 1),
-    "L": (0, -1),
-    "U": (1, 0),
-    "D": (-1, 0),
+    "R": (1, 0),
+    "L": (-1, 0),
+    "U": (0, 1),
+    "D": (0, -1),
 }
 
 
 def should_move(knot1, knot2):
-    for i in range(-1, 2):
-        for j in range(-1, 2):
-            if knot1[0] + i == knot2[0] and knot1[1] + j == knot2[1]:
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            if knot1[0] + dx == knot2[0] and knot1[1] + dy == knot2[1]:
                 return False
     return True
 
 
 def get_num_of_tail_visited(directions, snake_length):
-    knots = [[0, 0] for i in range(snake_length)]
+    knots = [[0, 0] for _ in range(snake_length)]
 
     visited = set()
 
     for line in lines:
         dir, steps = line.split()
         steps = int(steps)
+        dx, dy = dirs[dir]
 
-        dy, dx = dirs[dir]
         for _ in range(steps):
             head = knots[0]
             head[0] += dx
