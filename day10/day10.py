@@ -4,7 +4,7 @@ register = 1
 cycle = 1
 ans = 0
 
-grid = [[":"] * 40 for x in range(6)]
+grid = [[" "] * 40 for x in range(6)]
 
 
 def draw_pixel(grid, register, cycle):
