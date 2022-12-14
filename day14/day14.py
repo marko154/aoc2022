@@ -22,36 +22,36 @@ for line in lines:
                 rocks.add((x, y))
         prev = interval
 
-sand = set()
-
-lowest_rock = (0, 0)
+lowest_rock = 0
 
 for rock in rocks:
-    if lowest_rock[1] < rock[1]:
-        lowest_rock = rock
+    if lowest_rock < rock[1]:
+        lowest_rock = rock[1]
 
-floor = lowest_rock[1] + 2
+floor = lowest_rock + 2
 part1 = 0
+part2 = 0
 
 while True:
     x, y = 500, 0
-    if (x, y) in sand:
+    if (x, y) in rocks:
         break
 
     while True:
-        if y > lowest_rock[1] and not part1:
-            part1 = len(sand)
+        if y > lowest_rock and not part1:
+            part1 = part2
         bottom = (x, y + 1)
         left = (x - 1, y + 1)
         right = (x + 1, y + 1)
 
-        bottom_occ = bottom in rocks or bottom in sand or y + 1 == floor
-        left_occ = left in rocks or left in sand or y + 1 == floor
-        right_occ = right in rocks or right in sand or y + 1 == floor
-
-        if bottom_occ and left_occ and right_occ:
-            sand.add((x, y))
+        if y + 1 >= floor:
+            rocks.add((x, y))
+            part2 += 1
             break
+
+        bottom_occ = bottom in rocks
+        left_occ = left in rocks
+        right_occ = right in rocks
 
         if not bottom_occ:
             y += 1
@@ -62,8 +62,9 @@ while True:
             x += 1
             y += 1
         else:
-            sand.add((x, y))
+            rocks.add((x, y))
+            part2 += 1
             break
 
 print(part1)
-print(len(sand))
+print(part2)
