@@ -49,16 +49,12 @@ while True:
             part2 += 1
             break
 
-        bottom_occ = bottom in rocks
-        left_occ = left in rocks
-        right_occ = right in rocks
-
-        if not bottom_occ:
+        if not bottom in rocks:
             y += 1
-        elif not left_occ:
+        elif not left in rocks:
             x -= 1
             y += 1
-        elif not right_occ:
+        elif not right in rocks:
             x += 1
             y += 1
         else:
