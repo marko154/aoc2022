@@ -2,7 +2,7 @@ import re
 
 lines = [line.strip() for line in open("./input.txt", "r").readlines()]
 
-valves = [[]] * len(lines)
+rates = [0] * len(lines)
 matrix = [[float("inf")] * len(lines) for x in range(len(lines))]
 mapping = {}
 i = 0
@@ -18,26 +18,24 @@ for line in lines:
             mapping[exit] = i
             i += 1
         matrix[mapping[v]][mapping[exit]] = 1
-    valves[mapping[v]] = [v, rate, exits]
+    rates[mapping[v]] = rate
 
 for via in range(len(matrix)):
     for fr in range(len(matrix)):
         for to in range(len(matrix)):
-            matrix[fr][to] = min(matrix[fr][to], matrix[fr]
-                                 [via] + matrix[via][to])
+            matrix[fr][to] = min(matrix[fr][to], matrix[fr][via] + matrix[via][to])
 
-nodes = [i for i in range(len(matrix)) if valves[i][0]
-         == "AA" or valves[i][1] > 0]
-nodes.sort(key=lambda node: valves[node][0])
-visited = set()
+start = mapping["AA"]
+nodes = [i for i in range(len(matrix)) if rates[i] > 0]
+nodes.insert(0, start)
 
 
 def dfs(valve, time, nodes, visited):
-    global valves
+    global rates
     if time <= 0:
         return 0
 
-    name, rate, _ = valves[valve]
+    rate = rates[valve]
     visited.add(valve)
     max_pressure = 0
 
@@ -51,26 +49,21 @@ def dfs(valve, time, nodes, visited):
     return max_pressure + time * rate
 
 
-part1 = dfs(mapping["AA"], 30, nodes, set())
+part1 = dfs(start, 30, nodes, set())
 print(part1)
 part2 = 0
-done = set()
+nodes = nodes[1:]
 
-for i in range(1 << len(nodes) - 1):
-    if i in done:
-        continue
+for i in range(1 << (len(nodes) - 1)):
     left = []
     right = []
-    for j in range(len(nodes) - 1):
+    for j in range(len(nodes)):
         if (1 << j) & i:
-            left.append(nodes[1 + j])
+            left.append(nodes[j])
         else:
-            right.append(nodes[1 + j])
-    start = mapping["AA"]
+            right.append(nodes[j])
+    start = start
     left_pressure = dfs(start, 26, left, set())
     right_pressure = dfs(start, 26, right, set())
-    done.add(i)
-    done.add(~i)
     part2 = max(part2, left_pressure + right_pressure)
-
 print(part2)
