@@ -1,55 +1,80 @@
+import matplotlib.pyplot as plt
+import networkx as nx
 import re
-import heapq
-from collections import deque
-import sys
-
-sys.setrecursionlimit(1000000)
 
 lines = [line.strip() for line in open("./input.txt", "r").readlines()]
 lines = [line.strip() for line in open("./test.txt", "r").readlines()]
 
-valves = {}
+valves = [0] * len(lines)
+matrix = [[float("inf")] * len(lines) for x in range(len(lines))]
+mapping = {}
+i = 0
 
 for line in lines:
     v, *exits = re.findall(r"[A-Z][A-Z]", line)
+    if v not in mapping:
+        mapping[v] = i
+        i += 1
+    for exit in exits:
+        if exit not in mapping:
+            mapping[exit] = i
+            i += 1
+        matrix[mapping[v]][mapping[exit]] = 1
     rate = int(re.findall(r"\-?\d+", line)[0])
-
     valves[v] = [rate, exits]
 
-print(valves)
+edges = []
+
+for valve in valves:
+    rate, exits = valves[valve]
+    for exit in exits:
+        rate2, _ = valves[exit]
+        edges.append((valve + str(rate), exit + str(rate2)))
+
+
+for valve in valves:
+    index = valve
+    for
+    matrix[]
+
+G = nx.DiGraph()
+G.add_edges_from(edges)
+nx.draw_networkx(G)
+plt.show()
+exit()
+
 ans = 0
 
+opened = set()
+DP = {}
+print(valves)
 
-for i, valve in enumerate(valves):
+
+def dfs(valve, time):
+    global opened, valves
+    if time <= 0:
+        return 0
     rate, exits = valves[valve]
-    seen = set()
-    if valve != "DD":
-        continue
+    tupled = tuple(sorted(opened))
+    if (valve, time, *tupled) in DP:
+        return DP[(valve, time, *tupled)]
+    max_pressure = 0
 
-    def dfs(valve, time):
-        global seen, valves
-        rate, exits = valves[valve]
-        if rate != 0:
-            time -= 2
-        pressure = time * rate
+    for exit in exits:
+        without = dfs(exit, time - 1)
+        max_pressure = max(max_pressure, without)
+        # if already open dont open again
+        if valve not in opened or rate == 0:
+            opened.add(valve)
+            with_ = dfs(exit, time - 2)
+            max_pressure = max(max_pressure, with_ + time * rate)
+            if valve in opened:
+                opened.remove(valve)
+    DP[(valve, time, *tupled)] = max_pressure
+    return max_pressure
 
-        max_pressure = 0
 
-        for exit in exits:
-            if exit not in seen:
-                seen.add(valve)
-                with_ = dfs(exit, time - 2)
-                seen.remove(valve)
-                wihtout = dfs(exit, time - 1)
-                max_pressure = max(max_pressure, with_, wihtout)
-                print(valve, exit, with_, wihtout)
-        if max_pressure == 0:
-            print("end", time, valve)
-        return pressure + max_pressure
-
-    time = 31 if i == 0 else 30
-    best_pressure = dfs(valve, time)
-    print(best_pressure)
-    ans = max(ans, best_pressure)
+best_pressure = dfs("AA", 29)
+ans = max(ans, best_pressure)
 
 print(ans)
