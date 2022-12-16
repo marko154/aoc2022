@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import re
+import time as Time
+from itertools import permutations
 
 lines = [line.strip() for line in open("./input.txt", "r").readlines()]
-# lines = [line.strip() for line in open("./test.txt", "r").readlines()]
+lines = [line.strip() for line in open("./test.txt", "r").readlines()]
 
 valves = [[]] * len(lines)
 matrix = [[float("inf")] * len(lines) for x in range(len(lines))]
@@ -26,46 +28,67 @@ for line in lines:
 for via in range(len(matrix)):
     for fr in range(len(matrix)):
         for to in range(len(matrix)):
-            matrix[fr][to] = min(matrix[fr][to], matrix[fr][via] + matrix[via][to])
+            matrix[fr][to] = min(matrix[fr][to], matrix[fr]
+                                 [via] + matrix[via][to])
 
-opened = set()
+
+# nodes = [i for i in range(len(matrix)) if valves[i][1] > 0]
+
+# best = 0
+# for permutation in permutations(nodes):
+#     score = 0
+#     time = 30
+#     valve = mapping["AA"]
+#     for node in permutation:
+#         time -= matrix[valve][node] + 1
+#         score += time * valves[node][1]
+#         valve = node
+#     best = max(best, score)
+
+# print(best)
+
+visited = set()
 DP = {}
 
-nodes = [i for i in range(len(matrix)) if valves[i][0] == "AA" or valves[i][1] > 0]
+nodes = [i for i in range(len(matrix)) if valves[i][0]
+         == "AA" or valves[i][1] > 0]
 
 
 def dfs(valve, time):
-    global opened, valves, nodes
-    if time <= 0 or len(opened) == len(nodes) - 1:
+    global visited, valves, nodes
+    if time <= 0:
         return 0
+    # key = (valve, time, tuple(sorted(visited)))
+    # if key in DP:
+    #     return DP[key]
     name, rate, _ = valves[valve]
-    key = (time, valve, *tuple(sorted(opened)))
-    if key in DP:
-        return DP[key]
+    visited.add(valve)
     max_pressure = 0
 
     for exit in nodes:
         dist = matrix[valve][exit]
-        if exit == valve or dist == float("inf"):
-            continue
+        if exit not in visited:
+            next_time = time - dist - 1
+            pressure = dfs(exit, next_time)
+            max_pressure = max(max_pressure, pressure)
 
-        without = dfs(exit, time - dist)
-        max_pressure = max(max_pressure, without)
-        # if already open dont open again
-
-        if valve not in opened and rate != 0:
-            opened.add(valve)
-            with_ = dfs(exit, time - dist - 1)
-            max_pressure = max(max_pressure, with_ + time * rate)
-            if valve in opened:
-                opened.remove(valve)
-    DP[key] = max_pressure
-    return max_pressure
+    # DP[key] = max_pressure
+    visited.discard(valve)
+    return max_pressure + time * rate
 
 
-best_pressure = dfs(mapping["AA"], 29)
+best_pressure = dfs(mapping["AA"], 30)
 print(best_pressure)
 
+
+# for i, line in enumerate(matrix):
+#     if i == 0:
+#         print("    ", end="")
+#         for j in range(len(matrix)):
+#             print(valves[j][0], end=" ")
+#         print()
+#     print(valves[i][0], end=" ")
+#     print(line)
 
 # G = nx.DiGraph()
 
@@ -77,13 +100,13 @@ print(best_pressure)
 #             continue
 #         G.add_edge(
 #             valves[node][0] + str(valves[node][1]),
-#             valves[inode][0] + str(valves[node][1]),
+#             valves[inode][0] + str(valves[inode][1]),
 #             weight=dist,
 #         )
 
 # pos = nx.get_node_attributes(G, "pos")
 # pos = nx.spring_layout(G)  # pos = nx.nx_agraph.graphviz_layout(G)
 # nx.draw_networkx(G, pos)
-# # labels = nx.get_edge_attributes(G, "weight")
-# # nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+# labels = nx.get_edge_attributes(G, "weight")
+# nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
 # plt.show()
