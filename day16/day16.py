@@ -1,5 +1,5 @@
-import matplotlib.pyplot as plt
-import networkx as nx
+# import matplotlib.pyplot as plt
+# import networkx as nx
 import re
 
 lines = [line.strip() for line in open("./input.txt", "r").readlines()]
@@ -34,36 +34,87 @@ DP = {}
 nodes = [i for i in range(len(matrix)) if valves[i][0] == "AA" or valves[i][1] > 0]
 
 
-def dfs(valve, time):
+def dfs(my_state, elephant_state):
     global opened, valves, nodes
-    if time <= 0 or len(opened) == len(nodes) - 1:
+    me, my_time = my_state
+    elephant, elephant_time = elephant_state
+    if min(my_time, elephant_time) <= 0:
         return 0
-    name, rate, _ = valves[valve]
-    key = (time, valve, *tuple(sorted(opened)))
+    _, my_rate, _ = valves[me]
+    _, elephant_rate, _ = valves[elephant]
+
+    # DP
+    tupled = tuple(sorted(opened))
+    key = (my_time, elephant_time, me, elephant, *tupled)
+    symmetric_key = (elephant_time, my_time, elephant, me, *tupled)
     if key in DP:
         return DP[key]
+    if symmetric_key in DP:
+        return DP[symmetric_key]
+
     max_pressure = 0
+    # cases
+    # i open, elephant doesnt
+    # i open elephant does
+    # i dont open elephant doesnt
+    # i dont open elephant does
+    # check if me and elephant are in the same position before
 
-    for exit in nodes:
-        dist = matrix[valve][exit]
-        if exit == valve or dist == float("inf"):
+    # print(my_time, elephant_time)
+    assert my_time > 0
+    assert elephant_time > 0
+
+    for my_exit in nodes:
+        my_dist = matrix[me][my_exit]
+        if my_exit == me or my_dist == float("inf"):
             continue
+        for elephant_exit in nodes:
+            elephant_dist = matrix[elephant][elephant_exit]
+            if elephant_exit == elephant or elephant_dist == float("inf"):
+                continue
+            without = dfs(
+                (my_exit, my_time - my_dist),
+                (elephant_exit, elephant_time - elephant_dist),
+            )
+            max_pressure = max(max_pressure, without)
+            if elephant not in opened and elephant_rate != 0:
+                opened.add(elephant)
+                with_elephant = dfs(
+                    (my_exit, my_time - my_dist),
+                    (elephant_exit, elephant_time - elephant_dist - 1),
+                )
+                max_pressure = max(
+                    max_pressure, with_elephant + elephant_rate * elephant_time
+                )
+                opened.discard(elephant)
+        if me not in opened and my_rate != 0 and me != elephant:
+            opened.add(me)
+            for elephant_exit in nodes:
+                elephant_dist = matrix[elephant][elephant_exit]
+                if (
+                    elephant in opened
+                    or elephant_exit == elephant
+                    or elephant_dist == float("inf")
+                ):
+                    continue
+                opened.add(elephant)
+                with_both = dfs(
+                    (my_exit, my_time - my_dist - 1),
+                    (elephant_exit, elephant_time - elephant_dist - 1),
+                )
+                max_pressure = max(
+                    max_pressure,
+                    with_both + elephant_rate * elephant_time + my_rate * my_time,
+                )
+                opened.discard(elephant)
+            opened.discard(me)
 
-        without = dfs(exit, time - dist)
-        max_pressure = max(max_pressure, without)
-        # if already open dont open again
-
-        if valve not in opened and rate != 0:
-            opened.add(valve)
-            with_ = dfs(exit, time - dist - 1)
-            max_pressure = max(max_pressure, with_ + time * rate)
-            if valve in opened:
-                opened.remove(valve)
     DP[key] = max_pressure
     return max_pressure
 
 
-best_pressure = dfs(mapping["AA"], 29)
+start = (mapping["AA"], 25)
+best_pressure = dfs(start, start)
 print(best_pressure)
 
 
