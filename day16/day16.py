@@ -51,10 +51,12 @@ def dfs(valve, time, nodes, visited):
     return max_pressure + time * rate
 
 
-done = set()
+part1 = dfs(mapping["AA"], 30, nodes, set())
+print(part1)
 part2 = 0
+done = set()
+
 for i in range(1 << len(nodes) - 1):
-    print(i)
     if i in done:
         continue
     left = []
