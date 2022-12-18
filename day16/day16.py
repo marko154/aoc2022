@@ -27,7 +27,7 @@ for via in range(len(matrix)):
 
 start = mapping["AA"]
 nodes = [i for i in range(len(matrix)) if rates[i] > 0]
-nodes.insert(0, start)
+# nodes.insert(0, start)
 
 
 def dfs(valve, time, nodes, visited):
@@ -52,7 +52,7 @@ def dfs(valve, time, nodes, visited):
 part1 = dfs(start, 30, nodes, set())
 print(part1)
 part2 = 0
-nodes = nodes[1:]
+
 
 for i in range(1 << (len(nodes) - 1)):
     left = []
