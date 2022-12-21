@@ -11,24 +11,22 @@ names = ["ore", "clay", "obsidian", "geode"]
 def solve(end, oreC, clayC, obsC, geodeC):
     init_robots = (1, 0, 0, 0)
     init_rocks = (0, 0, 0, 0)
-    Q = []
     seen = set()
-    Q.append((0, init_robots, init_rocks))
+    stack = []
+    stack.append((0, init_robots, init_rocks))
 
     max_obsidian = geodeC[1]
     max_clay = obsC[1]
     max_ore = max(oreC, clayC, obsC[0], geodeC[0])
 
     best = 0
-    bestGR = 0
 
-    while Q:
-        state = Q.pop()
+    while stack:
+        state = stack.pop()
         time, robots, rocks = state
         ore, clay, obs, geode = rocks
         oreR, clayR, obsR, geodeR = robots
         best = max(best, geode)
-        bestGR = max(bestGR, geodeR)
 
         if time >= end:
             continue
@@ -52,11 +50,11 @@ def solve(end, oreC, clayC, obsC, geodeC):
         n_clay = clay + clayR
         n_obs = obs + obsR
         n_geode = geode + geodeR
-        qsize = len(Q)
+        qsize = len(stack)
 
         # geode
         if ore >= geodeC[0] and obs >= geodeC[1]:
-            Q.append(
+            stack.append(
                 (
                     time + 1,
                     (oreR, clayR, obsR, geodeR + 1),
@@ -66,16 +64,17 @@ def solve(end, oreC, clayC, obsC, geodeC):
             continue
         # obsidian
         if ore >= obsC[0] and clay >= obsC[1]:
-            Q.append(
+            stack.append(
                 (
                     time + 1,
                     (oreR, clayR, obsR + 1, geodeR),
                     (n_ore - obsC[0], n_clay - obsC[1], n_obs, n_geode),
                 )
             )
+            continue
         # clay
         if ore >= clayC:
-            Q.append(
+            stack.append(
                 (
                     time + 1,
                     (oreR, clayR + 1, obsR, geodeR),
@@ -85,7 +84,7 @@ def solve(end, oreC, clayC, obsC, geodeC):
 
         # ore
         if ore >= oreC:
-            Q.append(
+            stack.append(
                 (
                     time + 1,
                     (oreR + 1, clayR, obsR, geodeR),
@@ -93,8 +92,8 @@ def solve(end, oreC, clayC, obsC, geodeC):
                 )
             )
 
-        if qsize + 4 != len(Q):
-            Q.append(
+        if qsize + 4 != len(stack):
+            stack.append(
                 (
                     time + 1,
                     (oreR, clayR, obsR, geodeR),
