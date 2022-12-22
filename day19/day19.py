@@ -108,7 +108,8 @@ part2 = 1
 
 for i, line in enumerate(lines):
     data = line.split(": ")[1].split(". ")
-    parsed_costs = [tuple(map(int, re.findall(r"\d+", robot))) for robot in data]
+    parsed_costs = [tuple(map(int, re.findall(r"\d+", robot)))
+                    for robot in data]
 
     oreC = parsed_costs[0][0]
     clayC = parsed_costs[1][0]
