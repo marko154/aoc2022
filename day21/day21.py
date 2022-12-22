@@ -12,8 +12,6 @@ for line in lines:
 
 
 def evaluate(node):
-    global tree
-
     if len(tree[node]) == 1:
         return int(tree[node][0])
     left, op, right = tree[node]
@@ -27,8 +25,6 @@ marked = {}
 
 
 def traverse(node):
-    global tree, marked
-
     if len(tree[node]) == 1:
         marked[node] = (int(tree[node][0]), node == "humn")
         return marked[node]
